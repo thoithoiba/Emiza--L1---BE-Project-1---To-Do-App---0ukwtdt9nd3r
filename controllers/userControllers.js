@@ -5,6 +5,8 @@ const bcrypt  = require('bcrypt');
 const saltRounds = 10;
 const JWT_SECRET = "newtonSchool";
 
+
+
 /*
 loginUser Controller
 
@@ -57,14 +59,41 @@ json = {
 
 */
 
-const loginUser =async (req, res) => {
-
-    const email  = req.body.email;
+const loginUser = async (req, res) => {
+    const email = req.body.email;
     const password = req.body.password;
 
-    //Write your code here.
+    try {
+        const user = await Users.findOne({ email });
+        if (!user) {
+            return res.status(404).json({
+                meessage: 'User with this E-mail does not exist !!',
+                status: 'fail'
+            });
+        }
 
-}
+        const passwordMatch = await bcrypt.compare(password, user.password);
+
+        if(!passwordMatch) {
+            return res.status(403).json({
+                message: 'Invalid Password, try again !!',
+                status: fail
+            });
+        }
+
+        const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '1h' });
+
+        return res.status(200).json({
+            status: 'success',
+            token
+        });
+    } catch (error) {
+        return res.status(200).json({
+            message: 'Something went wrong',
+            status: 'fail'
+        });
+    }
+};
 
 
 
@@ -120,8 +149,38 @@ const signupUser = async (req, res) => {
     const {email, password, name, role} = req.body;
 
      //Write your code here.
+     try {
+        const existingUser = await Users.findOne({ email });
 
-}
+        if (existingUser) {
+            return res.status(409).json({
+                status: 'fail',
+                message: 'User with given Email already registered.'
+            });
+        }
+        const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+        const user = new Users({
+            name,
+            email,
+            password: hashedPassword,
+            role
+        });
+
+        await user.save();
+
+        return res.status(200).json({
+            message: 'User SignedUp successfully',
+            status: 'success'
+        });
+     } catch (error) {
+        return res.status(404).json({
+            ststus: 'fail',
+            message: 'Something went wrong'
+        });
+     }
+
+};
 
 module.exports = { loginUser , signupUser };
 

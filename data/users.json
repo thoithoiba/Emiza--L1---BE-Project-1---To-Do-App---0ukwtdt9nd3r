@@ -1,1 +1,15 @@
-[]
+[
+    {
+      "name": "Nepram Singh",
+      "password": "password123",
+      "role": "user",
+      "email": "nepram@example.com"
+    },
+    {
+      "name": "Jane Smith",
+      "password": "pass456",
+      "role": "admin",
+      "email": "jane@example.com"
+    }
+  ]
+  
